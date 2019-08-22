@@ -14,9 +14,14 @@ import java.util.*
  * Created by Farshid Roohi.
  * Graph | Copyrights 2019-08-21.
  */
-class LineChart : SurfaceView, SurfaceHolder.Callback {
+@SuppressLint("ViewConstructor")
+class LineChart(context: Context?, private val chartEntities: List<ChartEntity>) :
+    SurfaceView(context), SurfaceHolder.Callback {
 
-    var padding: Int = 80
+    var mPaddingTop: Int = 80
+    var mPaddingRight: Int = 40
+    var mPaddingLeft: Int = 40
+    var mPaddingBottom: Int = 90
     var maxValue: Long = 0
     var marginTop: Int = 50
     var increment: Long = 20
@@ -26,21 +31,17 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
     private val lineColor = Color.parseColor("#32FFFFFF")
     private val darkBlueColor = Color.parseColor("#FF2B4A83")
 
-    private var chartEntities: List<ChartEntity>
-    private var surfaceHolder: SurfaceHolder
+    private var surfaceHolder = holder
     private var drawThread: DrawThread? = null
 
     private val touchLock = Any()
 
-    constructor(context: Context?, lines: List<ChartEntity>) : super(context) {
-        this.chartEntities = lines
-        this.surfaceHolder = holder
+    init {
         this.surfaceHolder.addCallback(this)
-
         val maxes = ArrayList<Float>()
-        for (lineGraph in lines) {
+        for (lineGraph in chartEntities) {
             val copies =
-                Arrays.copyOf(lineGraph.values, lineGraph.values.size)
+                lineGraph.values.copyOf(lineGraph.values.size)
             Arrays.sort(copies)
             maxes.add(copies[copies.size - 1])
         }
@@ -61,7 +62,7 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
         if (this.drawThread == null) {
-            this.drawThread = DrawThread(surfaceHolder)
+            this.drawThread = DrawThread()
             this.drawThread!!.start()
         }
     }
@@ -69,8 +70,6 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
         val action = event.action
-        val x = event.x.toInt()
-        val y = event.y.toInt()
 
         if (drawThread == null) {
             return false
@@ -100,7 +99,7 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
 
     }
 
-    internal inner class DrawThread(val surfaceHolder: SurfaceHolder) : Thread() {
+    internal inner class DrawThread : Thread() {
         var isRun = true
         var isDirty = true
 
@@ -108,10 +107,10 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
         private val height = this@LineChart.height
         private val width = this@LineChart.width
 
-        private val xLength = width - (padding * 2)
-        private val yLength = height - (padding * 2 + marginTop)
+        private val xLength = width - (mPaddingLeft + mPaddingRight)
+        private val yLength = height - (mPaddingBottom + mPaddingTop + marginTop)
 
-        private val chartXLength = width - (padding * 2)
+        private val chartXLength = width - (mPaddingLeft + mPaddingRight)
 
         private var p = Paint()
         private var pCircle = Paint()
@@ -138,8 +137,8 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
                     canvas,
                     width,
                     height,
-                    padding,
-                    padding
+                    mPaddingLeft,
+                    mPaddingBottom
                 )
 
                 calcTimePass()
@@ -168,11 +167,9 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
                         )
 
                     }
-//                        drawGraphRegion(graphCanvasWrapper)
-                    this.drawXText(graphCanvasWrapper)
                     this.drawGraph(graphCanvasWrapper)
-
-                    this.surfaceHolder.unlockCanvasAndPost(graphCanvasWrapper.canvas)
+                    this.drawXText(graphCanvasWrapper)
+                    this@LineChart.surfaceHolder.unlockCanvasAndPost(graphCanvasWrapper.canvas)
                 }
             }
 
@@ -185,7 +182,6 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
             }
             var x: Float
             var y: Float
-
             val xGap = (xLength / (chartEntities[0].values.size - 1)).toFloat()
 
             for (i in 0 until chartEntities[0].values.size) {
@@ -198,19 +194,9 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
                 y = (-(20 + rect.height())).toFloat()
 
                 pMarkText.getTextBounds(text, 0, text.length, rect)
-
-                var degree: Int
-                var px = x + rect.exactCenterX()
-                var py = y + rect.exactCenterY()
-                if (i == 0) {
-                    degree = -45
-                    px += 10f
-                    py -= 10f
-                } else {
-                    degree = -45
-                    px += 10f
-                    py -= 10f
-                }
+                val degree: Int = -45
+                val px = rect.exactCenterX() + x + 10
+                val py = y + rect.exactCenterY() - 10
 
                 graphCanvas.drawText(
                     text,
@@ -237,7 +223,7 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
             this.pCircleBG.color = darkBlueColor
 
             for (i in 0 until chartEntities.size) {
-                val linePath = GraphPath(width, height, padding, padding)
+                val linePath = GraphPath(width, height, mPaddingLeft, mPaddingBottom)
                 var first = false
 
                 var x: Float
@@ -295,65 +281,6 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
 
 
         }
-
-        private fun drawGraphRegion(graphCanvasWrapper: GraphCanvasWrapper) {
-            var prevX = 0f
-            var prevY = 0f
-
-            var nextX = 0f
-            var nextY: Float
-
-            var value: Int
-            var mode: Float
-
-            for (i in 0 until chartEntities.size) {
-                val regionPath = GraphPath(
-                    width,
-                    height,
-                    padding,
-                    padding
-                )
-
-
-                var firstSet = false
-                var x: Float
-                var y: Float
-                p.color = chartEntities[i].color
-                pCircle.color = chartEntities[i].color
-                val xGap = xLength / (chartEntities[i].values.size - 1)
-
-                value = (anim / 1).toInt()
-                mode = anim % 1
-
-                for (j in 0..value) {
-                    if (j > chartEntities[i].values.size - 1) {
-                        return
-                    }
-
-                    x = (xGap * j).toFloat()
-                    y = yLength * chartEntities[i].values[j] / maxValue
-
-                    if (!firstSet) {
-                        regionPath.moveTo(x, 0.0f)
-                        regionPath.lineTo(x, y)
-
-                        firstSet = true
-                    } else {
-                        if (j > value) {
-                            nextX = x - prevX
-                            nextY = y - prevY
-                            regionPath.lineTo(prevX + nextX * mode, prevY + nextY * mode)
-                        } else {
-                            regionPath.lineTo(x, y)
-                        }
-                    }
-
-                    prevX = x
-                    prevY = y
-                }
-            }
-        }
-
 
         private fun calcTimePass() {
             val curTime = System.currentTimeMillis()

@@ -21,12 +21,13 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
     var marginTop: Int = 50
     var increment: Long = 20
     var animationDuration: Long = 200
+    var legendArray: Array<String>? = null
 
     private val lineColor = Color.parseColor("#32FFFFFF")
     private val darkBlueColor = Color.parseColor("#FF2B4A83")
 
     private var chartEntities: List<ChartEntity>
-    private lateinit var surfaceHolder: SurfaceHolder
+    private var surfaceHolder: SurfaceHolder
     private var drawThread: DrawThread? = null
 
     private val touchLock = Any()
@@ -99,7 +100,7 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
 
     }
 
-    inner class DrawThread(val surfaceHolder: SurfaceHolder) : Thread() {
+    internal inner class DrawThread(val surfaceHolder: SurfaceHolder) : Thread() {
         var isRun = true
         var isDirty = true
 
@@ -168,12 +169,59 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
 
                     }
 //                        drawGraphRegion(graphCanvasWrapper)
+                    this.drawXText(graphCanvasWrapper)
                     this.drawGraph(graphCanvasWrapper)
 
                     this.surfaceHolder.unlockCanvasAndPost(graphCanvasWrapper.canvas)
                 }
             }
 
+        }
+
+        private fun drawXText(graphCanvas: GraphCanvasWrapper) {
+
+            if (legendArray == null || legendArray.isNullOrEmpty()) {
+                return
+            }
+            var x: Float
+            var y: Float
+
+            val xGap = (xLength / (chartEntities[0].values.size - 1)).toFloat()
+
+            for (i in 0 until chartEntities[0].values.size) {
+                val rect = Rect()
+                val text = legendArray!![i]
+                pMarkText.measureText(text)
+                pMarkText.textSize = 20f
+
+                x = xGap * i
+                y = (-(20 + rect.height())).toFloat()
+
+                pMarkText.getTextBounds(text, 0, text.length, rect)
+
+                var degree: Int
+                var px = x + rect.exactCenterX()
+                var py = y + rect.exactCenterY()
+                if (i == 0) {
+                    degree = -45
+                    px += 10f
+                    py -= 10f
+                } else {
+                    degree = -45
+                    px += 10f
+                    py -= 10f
+                }
+
+                graphCanvas.drawText(
+                    text,
+                    x - rect.width() / 2,
+                    y,
+                    pMarkText,
+                    degree.toFloat(),
+                    px,
+                    py
+                )
+            }
         }
 
         private fun drawGraph(graphCanvasWrapper: GraphCanvasWrapper) {
@@ -202,43 +250,46 @@ class LineChart : SurfaceView, SurfaceHolder.Callback {
                 value = (anim / 1.0f).toInt()
                 mode = anim % 1.0f
 
-                for (j in 0 until value + 1) {
+                run {
+                    var j = 0
+                    while (j < value + 1) {
+                        if (j < chartEntities[i].values.size) {
+                            x = (gap * j).toFloat()
+                            y = yLength * chartEntities[i].values[j] / maxValue
+                            if (!first) {
 
-                    if (j < chartEntities[i].values.size) {
-
-                        x = (gap * j).toFloat()
-                        y = yLength * chartEntities[i].values[j] / maxValue
-
-                        if (!first) {
-                            linePath.moveTo(x + 2, y + 2)
-                            first = true
-                        } else {
-
-                            if (j > value && mode != 0f) {
-                                nextX = x - prevX
-                                nextY = y - prevY
-                                linePath.lineTo(prevX + nextX * mode, prevY + nextY * mode)
+                                linePath.moveTo(x + 2, y + 2)
+                                first = true
                             } else {
-                                linePath.lineTo(x, y)
+                                if (j > value && mode != 0f) {
+                                    nextX = x - prevX
+                                    nextY = y - prevY
+
+                                    linePath.lineTo(prevX + nextX * mode, prevY + nextY * mode)
+                                } else {
+                                    linePath.lineTo(x, y)
+                                }
                             }
+                            prevX = x
+                            prevY = y
 
                         }
-                        prevX = x
-                        prevY = y
-
+                        j++
                     }
+
                 }
 
                 graphCanvasWrapper.canvas.drawPath(linePath, p)
 
-                for (j in 0..(value).toInt() + 1) {
+                var j = 0
+                while (j < value + 1) {
                     if (j < chartEntities[i].values.size) {
                         x = (gap * j).toFloat()
                         y = yLength * chartEntities[i].values[j] / maxValue
                         graphCanvasWrapper.drawCircle(x, y, 8.0f, pCircleBG)
                         graphCanvasWrapper.drawCircle(x, y, 4.0f, pCircle)
                     }
-
+                    j++
                 }
             }
 

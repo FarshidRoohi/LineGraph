@@ -43,6 +43,12 @@ public class GraphCanvasWrapper {
 	public void drawText(String text, float x, float y, Paint paint){
 		mCanvas.drawText(text, mMt.calcX(x), mMt.calcY(y), paint);
 	}
+	public void drawText(String text, float x, float y, Paint paint, float degree, float px, float py) {
+		mCanvas.save();
+		mCanvas.rotate(degree, mMt.calcX(px), mMt.calcY(py));
+		mCanvas.drawText(text, mMt.calcX(x), mMt.calcY(y), paint);
+		mCanvas.restore();
+	}
 	
 	public void drawBitmapIcon(Bitmap bitmap, float left, float top, Paint paint){
 		mCanvas.drawBitmap(bitmap, mMt.calcBitmapCenterX(bitmap, left), mMt.calcBitmapCenterY(bitmap, top), paint);

@@ -17,7 +17,7 @@ import java.util.*
 class LineChart(context: Context?, private val chartEntities: List<ChartEntity>) :
     SurfaceView(context), SurfaceHolder.Callback {
 
-    private var mPaddingTop: Int = 80
+    private var mPaddingTop: Int = 40
     var mPaddingRight: Int = 40
     var mPaddingLeft: Int = 40
     var mPaddingBottom: Int = 90
@@ -74,6 +74,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
         private val yLength = height - (mPaddingBottom + mPaddingTop + marginTop)
 
         private val chartXLength = width - (mPaddingLeft + mPaddingRight)
+        private val chartYLength = height - (mPaddingTop + mPaddingBottom)
 
         private var p = Paint()
         private var pCircle = Paint()
@@ -125,10 +126,9 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                             newX,
                             0.0f,
                             newX,
-                            maxValue.toFloat(),
+                            chartYLength.toFloat(),
                             pBaseLine
                         )
-
                     }
                     this.drawGraph(graphCanvasWrapper)
                     this.drawXText(graphCanvasWrapper)
@@ -225,7 +225,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                     j++
                 }
 
-                graphCanvasWrapper.canvas.drawPath(linePath, p)
+                graphCanvasWrapper.canvas?.drawPath(linePath, p)
 
                 var counter = 0
                 while (counter < value + 1) {

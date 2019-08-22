@@ -3,7 +3,6 @@ package ir.farshid_roohi.linegraph
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.view.MotionEvent
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import ir.farshid_roohi.utilites.GraphCanvasWrapper
@@ -18,7 +17,7 @@ import java.util.*
 class LineChart(context: Context?, private val chartEntities: List<ChartEntity>) :
     SurfaceView(context), SurfaceHolder.Callback {
 
-    var mPaddingTop: Int = 80
+    private var mPaddingTop: Int = 80
     var mPaddingRight: Int = 40
     var mPaddingLeft: Int = 40
     var mPaddingBottom: Int = 90
@@ -31,13 +30,10 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
     private val lineColor = Color.parseColor("#32FFFFFF")
     private val darkBlueColor = Color.parseColor("#FF2B4A83")
 
-    private var surfaceHolder = holder
     private var drawThread: DrawThread? = null
 
-    private val touchLock = Any()
-
     init {
-        this.surfaceHolder.addCallback(this)
+        this.holder.addCallback(this)
         val maxes = ArrayList<Float>()
         for (lineGraph in chartEntities) {
             val copies =
@@ -55,8 +51,8 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
         this.drawThread?.apply {
-            isRun = false
-            drawThread = null
+            this.isRun = false
+            this@LineChart.drawThread = null
         }
     }
 
@@ -67,41 +63,8 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent): Boolean {
-        val action = event.action
-
-        if (drawThread == null) {
-            return false
-        }
-
-        when (action) {
-            MotionEvent.ACTION_DOWN -> {
-                synchronized(touchLock) {
-                    drawThread!!.isDirty = true
-                }
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                synchronized(touchLock) {
-                    drawThread!!.isDirty = true
-                }
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                synchronized(touchLock) {
-                    drawThread!!.isDirty = true
-                }
-                return true
-            }
-            else -> return super.onTouchEvent(event)
-        }
-
-    }
-
     internal inner class DrawThread : Thread() {
         var isRun = true
-        var isDirty = true
 
         private var anim = 0.0f
         private val height = this@LineChart.height
@@ -127,12 +90,12 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
             this.initializePaint()
             this.animStartTime = System.currentTimeMillis()
 
+            handler.postDelayed({
+                this.isRun = false
+            }, animationDuration)
+
             while (isRun) {
-                if (!isDirty) {
-                    sleep(100)
-                    continue
-                }
-                canvas = surfaceHolder.lockCanvas()
+                canvas = holder.lockCanvas()
                 graphCanvasWrapper = GraphCanvasWrapper(
                     canvas,
                     width,
@@ -140,9 +103,9 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                     mPaddingLeft,
                     mPaddingBottom
                 )
-
                 calcTimePass()
-                synchronized(surfaceHolder) {
+
+                synchronized(holder) {
 
                     canvas.drawColor(darkBlueColor)
 
@@ -169,7 +132,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                     }
                     this.drawGraph(graphCanvasWrapper)
                     this.drawXText(graphCanvasWrapper)
-                    this@LineChart.surfaceHolder.unlockCanvasAndPost(graphCanvasWrapper.canvas)
+                    this@LineChart.holder.unlockCanvasAndPost(graphCanvasWrapper.canvas)
                 }
             }
 
@@ -217,7 +180,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
             var nextX: Float
             var nextY: Float
 
-            var value: Int
+            var value: Float
             var mode: Float
 
             this.pCircleBG.color = darkBlueColor
@@ -233,49 +196,46 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                 this.pCircle.color = chartEntities[i].color
 
                 val gap = xLength / (chartEntities[i].values.size - 1)
-                value = (anim / 1.0f).toInt()
+                value = anim / 1.0f
                 mode = anim % 1.0f
 
-                run {
-                    var j = 0
-                    while (j < value + 1) {
-                        if (j < chartEntities[i].values.size) {
-                            x = (gap * j).toFloat()
-                            y = yLength * chartEntities[i].values[j] / maxValue
-                            if (!first) {
+                var j = 0
+                while (j < (value + 1)) {
+                    if (j < chartEntities[i].values.size) {
+                        x = (gap * j).toFloat()
+                        y = yLength * chartEntities[i].values[j] / maxValue
+                        if (!first) {
 
-                                linePath.moveTo(x + 2, y + 2)
-                                first = true
+                            linePath.moveTo(x + 2, y + 2)
+                            first = true
+                        } else {
+                            if (j > value && mode != 0f) {
+                                nextX = x - prevX
+                                nextY = y - prevY
+
+                                linePath.lineTo(prevX + nextX * mode, prevY + nextY * mode)
                             } else {
-                                if (j > value && mode != 0f) {
-                                    nextX = x - prevX
-                                    nextY = y - prevY
-
-                                    linePath.lineTo(prevX + nextX * mode, prevY + nextY * mode)
-                                } else {
-                                    linePath.lineTo(x, y)
-                                }
+                                linePath.lineTo(x, y)
                             }
-                            prevX = x
-                            prevY = y
-
                         }
-                        j++
-                    }
+                        prevX = x
+                        prevY = y
 
+                    }
+                    j++
                 }
 
                 graphCanvasWrapper.canvas.drawPath(linePath, p)
 
-                var j = 0
-                while (j < value + 1) {
-                    if (j < chartEntities[i].values.size) {
-                        x = (gap * j).toFloat()
-                        y = yLength * chartEntities[i].values[j] / maxValue
+                var counter = 0
+                while (counter < value + 1) {
+                    if (counter < chartEntities[i].values.size) {
+                        x = (gap * counter).toFloat()
+                        y = yLength * chartEntities[i].values[counter] / maxValue
                         graphCanvasWrapper.drawCircle(x, y, 8.0f, pCircleBG)
                         graphCanvasWrapper.drawCircle(x, y, 4.0f, pCircle)
                     }
-                    j++
+                    counter++
                 }
             }
 
@@ -285,12 +245,10 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
         private fun calcTimePass() {
             val curTime = System.currentTimeMillis()
             var gapTime = curTime - animStartTime
-            val animDuration = animationDuration
-            if (gapTime >= animDuration) {
-                gapTime = animDuration
-                isDirty = false
+            if (gapTime >= animationDuration) {
+                gapTime = animationDuration
             }
-            this.anim = chartEntities[0].values.size * gapTime.toFloat() / animDuration.toFloat()
+            this.anim = chartEntities[0].values.size * gapTime.toFloat() / animationDuration
         }
 
 

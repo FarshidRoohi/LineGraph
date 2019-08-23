@@ -7,7 +7,7 @@
 
 ##### screenShot: 
  
- <img src="https://raw.githubusercontent.com/FarshidRoohi/LineGraph/master/art/ScreenShot.png" alt="line chart android" width="627px" height="278px">
+ <img src="https://raw.githubusercontent.com/FarshidRoohi/LineGraph/master/art/ScreenShot.png" alt="line chart android" width="527px" height="278px">
 
 
  ###### gradle :   

@@ -22,6 +22,9 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+    sourceSets {
+        main.java.srcDirs += 'src/main/kotlin'
+    }
 
 }
 
@@ -48,6 +51,9 @@ artifacts {
     archives generateJavadocsJar
     archives generateSourcesJar
 }
+tasks.withType(Javadoc).all {
+    enabled = false
+}
 group = 'ir.farshid_roohi'
 version = '0.1.0'
 
@@ -73,6 +79,7 @@ bintray {
     }
     configurations = ['archives']
 }
+
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])

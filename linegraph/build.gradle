@@ -1,10 +1,11 @@
 apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'com.github.dcendents.android-maven'
+
 android {
     compileSdkVersion 29
-
-
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 29
@@ -22,6 +23,55 @@ android {
         }
     }
 
+}
+
+
+task generateSourcesJar(type: Jar) {
+    from android.sourceSets.main.java.srcDirs
+    classifier 'sources'
+}
+
+task generateJavadocs(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    classpath += project.files(android.getBootClasspath()
+            .join(File.pathSeparator))
+}
+
+task generateJavadocsJar(type: Jar) {
+    from generateJavadocs.destinationDir
+    classifier 'javadoc'
+}
+
+generateJavadocsJar.dependsOn generateJavadocs
+
+artifacts {
+    archives generateJavadocsJar
+    archives generateSourcesJar
+}
+group = 'ir.farshid_roohi'
+version = '0.1.0'
+
+bintray {
+    user = 'xxxx'
+    key = 'xxxx'
+    pkg {
+
+        repo = 'LineGraph'
+        name = 'LineGraph'
+        userOrg = ''
+
+        version {
+            name = '0.1.0'
+            desc = 'Line Graph Android'
+            released = new Date()
+            vcsTag = '0.1.0'
+        }
+
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/FarshidRoohi/LineGraph'
+        websiteUrl = 'http://farshid-roohi.ir'
+    }
+    configurations = ['archives']
 }
 
 dependencies {

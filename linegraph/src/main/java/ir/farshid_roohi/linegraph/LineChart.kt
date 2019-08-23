@@ -23,12 +23,12 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
     var mPaddingBottom: Int = 90
     var maxValue: Long = 0
     var marginTop: Int = 50
-    var increment: Long = 20
     var animationDuration: Long = 200
     var legendArray: Array<String>? = null
 
-    private val lineColor = Color.parseColor("#32FFFFFF")
-    private val darkBlueColor = Color.parseColor("#FF2B4A83")
+    var lineColor = Color.parseColor("#32FFFFFF")
+    var bgColor = Color.parseColor("#FF2B4A83")
+    var typeFace: Typeface? = null
 
     private var drawThread: DrawThread? = null
 
@@ -42,7 +42,6 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
             maxes.add(copies[copies.size - 1])
         }
         this.maxValue = (Collections.max(maxes) as Float).toLong()
-        this.increment = maxValue / 5
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -108,7 +107,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
 
                 synchronized(holder) {
 
-                    canvas.drawColor(darkBlueColor)
+                    canvas.drawColor(bgColor)
 
                     graphCanvasWrapper.drawLine(
                         0.0f,
@@ -152,6 +151,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
                 val text = legendArray!![i]
                 pMarkText.measureText(text)
                 pMarkText.textSize = 20f
+                pMarkText.typeface = typeFace
 
                 x = xGap * i
                 y = (-(20 + rect.height())).toFloat()
@@ -183,7 +183,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
             var value: Float
             var mode: Float
 
-            this.pCircleBG.color = darkBlueColor
+            this.pCircleBG.color = bgColor
 
             for (i in 0 until chartEntities.size) {
                 val linePath = GraphPath(width, height, mPaddingLeft, mPaddingBottom)
@@ -274,7 +274,7 @@ class LineChart(context: Context?, private val chartEntities: List<ChartEntity>)
             pCircleBG = Paint()
             pCircleBG.isAntiAlias = true
             pCircleBG.isFilterBitmap = true
-            pCircleBG.color = darkBlueColor
+            pCircleBG.color = bgColor
             pCircleBG.strokeWidth = 10f
             pCircleBG.style = Paint.Style.FILL_AND_STROKE
 

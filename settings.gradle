@@ -1,2 +1,2 @@
-include ':app', ':linegraph'
+include ':sample', ':linegraph'
 rootProject.name='Graph'

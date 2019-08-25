@@ -15,15 +15,6 @@
 ```Gradle  
   implementation 'ir.farshid_roohi:linegraph:0.1.0'
  ```  
- 
- ```Gradle
- allprojects {
-     repositories {
-         google()
-         jcenter()
-         mavenLocal()
-     }
-```
  <hr>
  
 Thanks for the [HzGrapher](https://github.com/handstudio/HzGrapher)

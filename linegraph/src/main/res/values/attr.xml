@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+<declare-styleable name="LineChart">
+    <attr name="chart_padding_top" format="dimension"/>
+    <attr name="chart_padding_right" format="dimension"/>
+    <attr name="chart_padding_bottom" format="dimension"/>
+    <attr name="chart_padding_left" format="dimension"/>
+    <attr name="chart_bg_color" format="color"/>
+    <attr name="chart_line_color" format="color"/>
+
+</declare-styleable>
+
+</resources>

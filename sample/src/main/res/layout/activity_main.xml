@@ -13,11 +13,18 @@
         app:cardBackgroundColor="#FF2B4A83"
         app:cardCornerRadius="5dp">
 
-        <LinearLayout
-            android:id="@+id/chartLayout"
+        <ir.farshid_roohi.linegraph.LineChart
+            android:id="@+id/lineChart"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="vertical" />
+            android:orientation="vertical"
+            app:chart_padding_bottom="35dp"
+            app:chart_padding_left="20dp"
+            app:chart_padding_right="20dp"
+            app:chart_padding_top="20dp"
+            app:chart_line_color="#32FFFFFF"
+            app:chart_bg_color="#FF2B4A83"
+            />
 
     </androidx.cardview.widget.CardView>
 

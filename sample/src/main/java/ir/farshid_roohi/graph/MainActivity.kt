@@ -19,14 +19,8 @@ class MainActivity : AppCompatActivity() {
         val list = ArrayList<ChartEntity>()
         list.add(firstChartEntity)
         list.add(secondChartEntity)
-
-        val lineChart = LineChart(this, list)
-        lineChart.animationDuration = 2000
         lineChart.legendArray = legendArr
-        lineChart.bgColor = Color.parseColor("#FF2B4A83")
-
-        chartLayout.addView(lineChart)
-
+        lineChart.setList(list)
     }
 
     private val graph1 = floatArrayOf(
@@ -42,19 +36,8 @@ class MainActivity : AppCompatActivity() {
         5000f,
         33000f
     )
-    private val graph2 = floatArrayOf(
-        0f,
-        245000f,
-        1011000f,
-        1000f,
-        0f,
-        0f,
-        47000f,
-        20000f,
-        12000f,
-        124400f,
-        160000f
-    )
+    private val graph2 =
+        floatArrayOf(0f, 245000f, 1011000f, 1000f, 0f, 0f, 47000f, 20000f, 12000f, 124400f, 160000f)
     private val legendArr = arrayOf(
         "05/21",
         "05/22",

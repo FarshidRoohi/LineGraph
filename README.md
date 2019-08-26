@@ -13,7 +13,7 @@
  ###### Gradle :   
   
 ```Gradle  
-  implementation 'ir.farshid_roohi:linegraph:0.1.0'
+  implementation 'ir.farshid_roohi:linegraph:0.1.1'
  ```  
  ```xml  
    <ir.farshid_roohi.linegraph.LineChart

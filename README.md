@@ -1,7 +1,7 @@
 ##Line Chart
 
 
-[ ![Download](https://api.bintray.com/packages/farshidroohi/LineGraph/LineGraph/images/download.svg?version=0.1.0) ](https://bintray.com/farshidroohi/LineGraph/LineGraph/0.1.0/link)
+[ ![Download](https://api.bintray.com/packages/farshidroohi/LineGraph/LineGraph/images/download.svg?version=0.1.0) ](https://bintray.com/farshidroohi/LineGraph/LineGraph/0.1.1/link)
   ![API](https://img.shields.io/badge/API-14%2B-blue.svg?style=flat)
 
 

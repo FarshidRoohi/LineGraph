@@ -4,10 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import ir.farshid_roohi.utilites.GraphCanvasWrapper
 import ir.farshid_roohi.utilites.GraphPath
 import java.util.*
+import kotlin.collections.HashMap
+import kotlin.math.abs
 
 
 /**
@@ -53,7 +57,11 @@ class LineChart : View {
         initialize(attrs)
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         initialize(attrs)
     }
 
@@ -62,12 +70,21 @@ class LineChart : View {
         attrs?.let {
             val typeArray = context.obtainStyledAttributes(attrs, R.styleable.LineChart)
 
-            this.bgColor = typeArray.getColor(R.styleable.LineChart_chart_bg_color, Color.parseColor("#FF2B4A83"))
-            this.lineColor = typeArray.getColor(R.styleable.LineChart_chart_line_color, Color.parseColor("#32FFFFFF"))
+            this.bgColor = typeArray.getColor(
+                R.styleable.LineChart_chart_bg_color,
+                Color.parseColor("#FF2B4A83")
+            )
+            this.lineColor = typeArray.getColor(
+                R.styleable.LineChart_chart_line_color,
+                Color.parseColor("#32FFFFFF")
+            )
             this.mPaddingTop = typeArray.getDimension(R.styleable.LineChart_chart_padding_top, 20f)
-            this.mPaddingRight = typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
-            this.mPaddingBottom = typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
-            this.mPaddingLeft = typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
+            this.mPaddingRight =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
+            this.mPaddingBottom =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
+            this.mPaddingLeft =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
 
             typeArray.recycle()
         }
@@ -96,9 +113,47 @@ class LineChart : View {
             maxes.add(copies[copies.size - 1])
         }
         this.maxValue = (Collections.max(maxes) as Float).toLong()
+        this.initializePaint()
     }
 
 
+    private var isMoved = false
+    private var locationX = 0f
+    private var locationY = 0f
+
+    private var distanceX = 0f
+    private var distanceY = 0f
+    private var lastX = 0f
+    private var lastY = 0f
+
+
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean {
+
+        when (event!!.action) {
+            MotionEvent.ACTION_MOVE -> {
+                isMoved = true
+                locationX = event.x
+                locationY = event.y
+
+                distanceX += abs(lastX - event.x)
+                distanceY += abs(lastY - event.y)
+                lastY = event.y
+                lastX = event.x
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                isMoved = false
+                invalidate()
+            }
+        }
+
+
+
+        return true
+    }
+
+    private var valueMap: HashMap<Int, Float> = HashMap()
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -106,15 +161,8 @@ class LineChart : View {
             return
         }
 
-        if (chartEntities == null) {
-            canvas.drawColor(bgColor)
-
-        }
-
-        this.initializePaint()
-
         this.xLength = (width - (mPaddingLeft + mPaddingRight)).toInt()
-        this.yLength = (height - (mPaddingBottom + mPaddingTop + marginTop)).toInt()
+        this.yLength = (height - (mPaddingBottom + mPaddingTop)).toInt()
 
         this.chartXLength = (width - (mPaddingLeft + mPaddingRight)).toInt()
         this.chartYLength = (height - (mPaddingTop + mPaddingBottom)).toInt()
@@ -122,7 +170,15 @@ class LineChart : View {
         canvas.drawColor(bgColor)
 
 
-        val graphCanvasWrapper = GraphCanvasWrapper(canvas, this.width, this.height, this.mPaddingLeft.toInt(), this.mPaddingBottom.toInt())
+        val graphCanvasWrapper = GraphCanvasWrapper(
+            canvas,
+            this.width,
+            this.height,
+            this.mPaddingLeft.toInt(),
+            this.mPaddingBottom.toInt()
+        )
+
+
         graphCanvasWrapper.drawLine(0.0f, 0.0f, chartXLength.toFloat(), 0.0f, pBaseLine)
 
         var newX: Float
@@ -133,7 +189,21 @@ class LineChart : View {
 
             drawGraph(graphCanvasWrapper)
             drawXText(graphCanvasWrapper)
+
+
+
         }
+
+
+//        if (isMoved) {
+//            Log.d("TAGA_AFF", "is moved")
+//
+//            val index = (locationX / width).toInt()
+//            graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+//            val a = valueMap[index]
+//            graphCanvasWrapper.drawCircle(locationX, y, 8f, pCircle)
+//        }
+
     }
 
 
@@ -198,16 +268,26 @@ class LineChart : View {
                 if (j < chartEntities!![m].values.size) {
                     x = (xGap * j).toFloat()
                     y = yLength * chartEntities!![m].values[j] / maxValue
+
+                    Log.d("TAGAG","x : $x | y : $y")
+
                     if (!first) {
                         linePath.moveTo(x, y)
                         first = true
                     } else {
                         linePath.lineTo(x, y)
                     }
+
+                    if (isMoved) {
+                        graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+//                        graphCanvasWrapper.drawCircle(locationX, locationY, 8f, pCircle)
+                    }
+
                 }
             }
 
             graphCanvasWrapper.canvas?.drawPath(linePath, p)
+
 
             for (t in chartEntities!![m].values.indices) {
                 if (t < chartEntities!![m].values.size) {
@@ -215,7 +295,10 @@ class LineChart : View {
                     y = yLength * chartEntities!![m].values[t] / maxValue
                     graphCanvasWrapper.drawCircle(x, y, 8.0f, pCircle)
                     graphCanvasWrapper.drawCircle(x, y, 4.0f, pCircleBG)
+
+                    valueMap[t] = x
                 }
+
             }
         }
 

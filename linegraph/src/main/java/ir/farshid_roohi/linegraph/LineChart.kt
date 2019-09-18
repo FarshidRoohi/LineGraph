@@ -21,6 +21,7 @@ class LineChart : View {
     var mPaddingRight: Float = 40f
     var mPaddingLeft: Float = 40f
     var mPaddingBottom: Float = 90f
+    var chartLineSize: Float = 10f
     var maxValue: Long = 0
     var marginTop: Int = 50
     var legendArray: Array<String>? = null
@@ -53,7 +54,11 @@ class LineChart : View {
         initialize(attrs)
     }
 
-    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {
+    constructor(context: Context?, attrs: AttributeSet?, defStyleAttr: Int) : super(
+        context,
+        attrs,
+        defStyleAttr
+    ) {
         initialize(attrs)
     }
 
@@ -62,12 +67,22 @@ class LineChart : View {
         attrs?.let {
             val typeArray = context.obtainStyledAttributes(attrs, R.styleable.LineChart)
 
-            this.bgColor = typeArray.getColor(R.styleable.LineChart_chart_bg_color, Color.parseColor("#FF2B4A83"))
-            this.lineColor = typeArray.getColor(R.styleable.LineChart_chart_line_color, Color.parseColor("#32FFFFFF"))
+            this.bgColor = typeArray.getColor(
+                R.styleable.LineChart_chart_bg_color,
+                Color.parseColor("#FF2B4A83")
+            )
+            this.lineColor = typeArray.getColor(
+                R.styleable.LineChart_chart_line_color,
+                Color.parseColor("#32FFFFFF")
+            )
             this.mPaddingTop = typeArray.getDimension(R.styleable.LineChart_chart_padding_top, 20f)
-            this.mPaddingRight = typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
-            this.mPaddingBottom = typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
-            this.mPaddingLeft = typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
+            this.mPaddingRight =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
+            this.mPaddingBottom =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
+            this.mPaddingLeft =
+                typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
+            this.chartLineSize = typeArray.getDimension(R.styleable.LineChart_chart_line_size, 10f)
 
             typeArray.recycle()
         }
@@ -122,7 +137,13 @@ class LineChart : View {
         canvas.drawColor(bgColor)
 
 
-        val graphCanvasWrapper = GraphCanvasWrapper(canvas, this.width, this.height, this.mPaddingLeft.toInt(), this.mPaddingBottom.toInt())
+        val graphCanvasWrapper = GraphCanvasWrapper(
+            canvas,
+            this.width,
+            this.height,
+            this.mPaddingLeft.toInt(),
+            this.mPaddingBottom.toInt()
+        )
         graphCanvasWrapper.drawLine(0.0f, 0.0f, chartXLength.toFloat(), 0.0f, pBaseLine)
 
         var newX: Float
@@ -226,10 +247,9 @@ class LineChart : View {
         p = Paint()
         p.flags = Paint.ANTI_ALIAS_FLAG
         p.isAntiAlias = true
-        p.isFilterBitmap = true
         p.color = Color.BLUE
-        p.strokeWidth = 10f
-        p.isAntiAlias = true
+        p.isFilterBitmap = true
+        p.strokeWidth = this.chartLineSize
         p.strokeCap = Paint.Cap.ROUND
         p.style = Paint.Style.STROKE
 
@@ -238,20 +258,19 @@ class LineChart : View {
         pCircle.isAntiAlias = true
         pCircle.isFilterBitmap = true
         pCircle.color = Color.BLUE
-        pCircle.strokeWidth = 20f
+        pCircle.strokeWidth = (this.chartLineSize * 2)
         pCircle.style = Paint.Style.STROKE
 
         pCircleBG = Paint()
         pCircleBG.isAntiAlias = true
-        pCircleBG.isFilterBitmap = true
         pCircleBG.color = bgColor
-        pCircleBG.strokeWidth = 10f
+        pCircleBG.isFilterBitmap = true
+        pCircleBG.strokeWidth = this.chartLineSize
         pCircleBG.style = Paint.Style.FILL_AND_STROKE
 
         pLine = Paint()
         pLine.flags = Paint.ANTI_ALIAS_FLAG
         pLine.isAntiAlias = true //text anti alias
-        pLine.isFilterBitmap = true // bitmap anti alias
         pLine.shader = LinearGradient(
             0f,
             300f,

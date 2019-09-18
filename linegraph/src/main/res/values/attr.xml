@@ -9,6 +9,7 @@
     <attr name="chart_padding_left" format="dimension"/>
     <attr name="chart_bg_color" format="color"/>
     <attr name="chart_line_color" format="color"/>
+    <attr name="chart_line_size" format="dimension"/>
 
 </declare-styleable>
 

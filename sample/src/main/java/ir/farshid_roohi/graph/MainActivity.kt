@@ -4,7 +4,6 @@ import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ir.farshid_roohi.linegraph.ChartEntity
-import ir.farshid_roohi.linegraph.LineChart
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -16,10 +15,11 @@ class MainActivity : AppCompatActivity() {
         val firstChartEntity = ChartEntity(Color.WHITE, graph1)
         val secondChartEntity = ChartEntity(Color.YELLOW, graph2)
 
-        val list = ArrayList<ChartEntity>()
-        list.add(firstChartEntity)
-        list.add(secondChartEntity)
-        lineChart.legendArray = legendArr
+        val list = ArrayList<ChartEntity>().apply {
+            add(firstChartEntity)
+            add(secondChartEntity)
+        }
+        lineChart.setLegend(legendArr)
         lineChart.setList(list)
     }
 
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     )
     private val graph2 =
         floatArrayOf(0f, 245000f, 1011000f, 1000f, 0f, 0f, 47000f, 20000f, 12000f, 124400f, 160000f)
-    private val legendArr = arrayOf(
+    private val legendArr = arrayListOf(
         "05/21",
         "05/22",
         "05/23",

@@ -4,22 +4,17 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
-import android.util.Log
-import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import ir.farshid_roohi.utilites.GraphCanvasWrapper
 import ir.farshid_roohi.utilites.GraphPath
 import java.util.*
-import kotlin.collections.HashMap
-import kotlin.math.abs
 
 
 /**
  * Created by Farshid Roohi.
  * Graph | Copyrights 2019-08-21.
  */
-@SuppressLint("ViewConstructor")
 class LineChart : View {
 
     private var mPaddingTop: Float = 40f
@@ -69,7 +64,7 @@ class LineChart : View {
     private fun initialize(attrs: AttributeSet?) {
 
         attrs?.let {
-            val typeArray = context.obtainStyledAttributes(attrs, R.styleable.LineChart)
+            val typeArray = context.obtainStyledAttributes(it, R.styleable.LineChart)
 
             try {
                 this.bgColor = typeArray.getColor(
@@ -152,30 +147,30 @@ class LineChart : View {
     private var lastY = 0f
 
 
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouchEvent(event: MotionEvent?): Boolean = event?.let {
-        when (event.action) {
-            MotionEvent.ACTION_MOVE -> {
-                isMoved = true
-                locationX = event.x
-                locationY = event.y
+//    @SuppressLint("ClickableViewAccessibility")
+//    override fun onTouchEvent(event: MotionEvent?): Boolean = event?.let {
+//        when (event.action) {
+//            MotionEvent.ACTION_MOVE -> {
+//                isMoved = true
+//                locationX = event.x
+//                locationY = event.y
+//
+//                distanceX += abs(lastX - event.x)
+//                distanceY += abs(lastY - event.y)
+//                lastY = event.y
+//                lastX = event.x
+//                invalidate()
+//            }
+//            MotionEvent.ACTION_UP -> {
+//                isMoved = false
+//                invalidate()
+//            }
+//        }
+//
+//        true
+//    } ?: false
 
-                distanceX += abs(lastX - event.x)
-                distanceY += abs(lastY - event.y)
-                lastY = event.y
-                lastX = event.x
-                invalidate()
-            }
-            MotionEvent.ACTION_UP -> {
-                isMoved = false
-                invalidate()
-            }
-        }
-
-        true
-    } ?: false
-
-    private var valueMap: HashMap<Int, Float> = HashMap()
+//    private var valueMap: HashMap<Int, Float> = HashMap()
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -213,7 +208,9 @@ class LineChart : View {
             drawXText(graphCanvasWrapper)
         }
 
-
+        canvas.save()
+        canvas.restore()
+//
 //        if (isMoved) {
 //            Log.d("TAGA_AFF", "is moved")
 //
@@ -284,7 +281,7 @@ class LineChart : View {
                     x = (xGap * j).toFloat()
                     y = yLength * chartEntities[m].values[j] / maxValue
 
-                    Log.d("TAGAG","x : $x | y : $y")
+//                    Log.d("TAGAG","x : $x | y : $y")
 
                     if (first) {
                         linePath.lineTo(x, y)
@@ -293,10 +290,10 @@ class LineChart : View {
                         first = true
                     }
 
-                    if (isMoved) {
-                        graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+//                    if (isMoved) {
+//                        graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
 //                        graphCanvasWrapper.drawCircle(locationX, locationY, 8f, pCircle)
-                    }
+//                    }
 
                 }
             }
@@ -314,7 +311,7 @@ class LineChart : View {
                         drawCircle(x, y, 4.0f, pCircleBG)
                     }
 
-                    valueMap[t] = x
+//                    valueMap[t] = x
                 }
 
             }

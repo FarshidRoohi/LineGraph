@@ -55,7 +55,7 @@ tasks.withType(Javadoc).all {
     enabled = false
 }
 group = 'ir.farshid_roohi'
-version = '0.1.2'
+version = '0.1.3'
 
 bintray {
     user = 'xxxx'
@@ -67,10 +67,10 @@ bintray {
         userOrg = ''
 
         version {
-            name = '0.1.2'
+            name = '0.1.3'
             desc = 'Line Graph Android'
             released = new Date()
-            vcsTag = '0.1.2'
+            vcsTag = '0.1.3'
         }
 
         licenses = ['Apache-2.0']

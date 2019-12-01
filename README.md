@@ -1,7 +1,7 @@
 ##Line Chart
 
 
-[ ![Download](https://api.bintray.com/packages/farshidroohi/LineGraph/LineGraph/images/download.svg?version=0.1.2) ](https://bintray.com/farshidroohi/LineGraph/LineGraph/0.1.2/link)
+[ ![Download](https://api.bintray.com/packages/farshidroohi/LineGraph/LineGraph/images/download.svg?version=0.1.3) ](https://bintray.com/farshidroohi/LineGraph/LineGraph/0.1.3/link)
   ![API](https://img.shields.io/badge/API-14%2B-blue.svg?style=flat)
 
 
@@ -13,7 +13,7 @@
  ###### Gradle :   
   
 ```Gradle  
-  implementation 'ir.farshid_roohi:linegraph:0.1.2'
+  implementation 'ir.farshid_roohi:linegraph:0.1.3'
  ```  
  ```xml  
    <ir.farshid_roohi.linegraph.LineChart

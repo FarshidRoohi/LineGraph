@@ -5,6 +5,7 @@ import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
 import android.view.View
+import androidx.core.content.ContextCompat
 import ir.farshid_roohi.utilites.GraphCanvasWrapper
 import ir.farshid_roohi.utilites.GraphPath
 import java.util.*
@@ -14,7 +15,6 @@ import java.util.*
  * Created by Farshid Roohi.
  * Graph | Copyrights 2019-08-21.
  */
-@SuppressLint("ViewConstructor")
 class LineChart : View {
 
     private var mPaddingTop: Float = 40f

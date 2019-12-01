@@ -21,10 +21,7 @@ class LineChart : View {
     var mPaddingRight: Float = 40f
     var mPaddingLeft: Float = 40f
     var mPaddingBottom: Float = 90f
-    var chartLineSize: Float = 10f
     var maxValue: Long = 0
-    var marginTop: Int = 50
-    var legendArray: Array<String>? = null
 
     var lineColor: Int = 0
     var bgColor: Int = 0
@@ -44,7 +41,9 @@ class LineChart : View {
     private var pBaseLineX = Paint()
     private var pMarkText = Paint()
 
-    private var chartEntities: List<ChartEntity>? = null
+    private var legendArray: MutableList<String> = mutableListOf()
+
+    private var chartEntities: MutableList<ChartEntity> = mutableListOf()
 
     constructor(context: Context?) : super(context) {
         initialize(null)
@@ -65,55 +64,113 @@ class LineChart : View {
     private fun initialize(attrs: AttributeSet?) {
 
         attrs?.let {
-            val typeArray = context.obtainStyledAttributes(attrs, R.styleable.LineChart)
+            val typeArray = context.obtainStyledAttributes(it, R.styleable.LineChart)
 
-            this.bgColor = typeArray.getColor(
-                R.styleable.LineChart_chart_bg_color,
-                Color.parseColor("#FF2B4A83")
-            )
-            this.lineColor = typeArray.getColor(
-                R.styleable.LineChart_chart_line_color,
-                Color.parseColor("#32FFFFFF")
-            )
-            this.mPaddingTop = typeArray.getDimension(R.styleable.LineChart_chart_padding_top, 20f)
-            this.mPaddingRight =
-                typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
-            this.mPaddingBottom =
-                typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
-            this.mPaddingLeft =
-                typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
-            this.chartLineSize = typeArray.getDimension(R.styleable.LineChart_chart_line_size, 10f)
+            try {
+                this.bgColor = typeArray.getColor(
+                    R.styleable.LineChart_chart_bg_color,
+                    ContextCompat.getColor(context, R.color.mid_blue)
+                )
+                this.lineColor = typeArray.getColor(
+                    R.styleable.LineChart_chart_line_color,
+                    ContextCompat.getColor(context, R.color.light_white)
+                )
+                this.mPaddingTop =
+                    typeArray.getDimension(R.styleable.LineChart_chart_padding_top, 20f)
+                this.mPaddingRight =
+                    typeArray.getDimension(R.styleable.LineChart_chart_padding_right, 20f)
+                this.mPaddingBottom =
+                    typeArray.getDimension(R.styleable.LineChart_chart_padding_bottom, 20f)
+                this.mPaddingLeft =
+                    typeArray.getDimension(R.styleable.LineChart_chart_padding_left, 20f)
 
-            typeArray.recycle()
+            } finally {
+                typeArray.recycle()
+
+            }
         }
 
         val graph1 = floatArrayOf(113000f, 183000f, 188000f, 695000f, 324000f, 230000f, 188000f)
         val graph2 = floatArrayOf(0f, 245000f, 1011000f, 1000f, 0f, 0f, 47000f)
 
-        val arrGraph = ArrayList<ChartEntity>()
-        arrGraph.add(ChartEntity(Color.GRAY, graph1))
-        arrGraph.add(ChartEntity(Color.WHITE, graph2))
+        val arrGraph = ArrayList<ChartEntity>().apply {
+            add(ChartEntity(Color.GRAY, graph1))
+            add(ChartEntity(Color.WHITE, graph2))
+        }
+
         setList(arrGraph)
         invalidate()
-
     }
 
+    fun setLegend(list: ArrayList<String>) {
+        setLegend(list.toList())
+    }
+
+    fun setLegend(list: List<String>) {
+        legendArray.clear()
+
+        if (list.isNotEmpty())
+            legendArray.addAll(list)
+    }
+
+    fun setList(list: ArrayList<ChartEntity>) {
+        setList(list.toList())
+    }
 
     fun setList(list: List<ChartEntity>) {
-        this.chartEntities = null
+        this.chartEntities.clear()
         invalidate()
-        this.chartEntities = list
+
+        if (list.isEmpty()) //no need to go farther
+            return
+
+        this.chartEntities.addAll(list)
+
         val maxes = ArrayList<Float>()
-        for (lineGraph in chartEntities!!) {
-            val copies =
-                lineGraph.values.copyOf(lineGraph.values.size)
-            Arrays.sort(copies)
+        for (lineGraph in chartEntities) {
+            val copies = lineGraph.values.copyOf(lineGraph.values.size)
+            copies.sort()
             maxes.add(copies[copies.size - 1])
         }
         this.maxValue = (Collections.max(maxes) as Float).toLong()
+        this.initializePaint()
     }
 
 
+    private var isMoved = false
+    private var locationX = 0f
+    private var locationY = 0f
+
+    private var distanceX = 0f
+    private var distanceY = 0f
+    private var lastX = 0f
+    private var lastY = 0f
+
+
+//    @SuppressLint("ClickableViewAccessibility")
+//    override fun onTouchEvent(event: MotionEvent?): Boolean = event?.let {
+//        when (event.action) {
+//            MotionEvent.ACTION_MOVE -> {
+//                isMoved = true
+//                locationX = event.x
+//                locationY = event.y
+//
+//                distanceX += abs(lastX - event.x)
+//                distanceY += abs(lastY - event.y)
+//                lastY = event.y
+//                lastX = event.x
+//                invalidate()
+//            }
+//            MotionEvent.ACTION_UP -> {
+//                isMoved = false
+//                invalidate()
+//            }
+//        }
+//
+//        true
+//    } ?: false
+
+//    private var valueMap: HashMap<Int, Float> = HashMap()
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
@@ -129,7 +186,7 @@ class LineChart : View {
         this.initializePaint()
 
         this.xLength = (width - (mPaddingLeft + mPaddingRight)).toInt()
-        this.yLength = (height - (mPaddingBottom + mPaddingTop + marginTop)).toInt()
+        this.yLength = (height - (mPaddingBottom + mPaddingTop)).toInt()
 
         this.chartXLength = (width - (mPaddingLeft + mPaddingRight)).toInt()
         this.chartYLength = (height - (mPaddingTop + mPaddingBottom)).toInt()
@@ -144,32 +201,48 @@ class LineChart : View {
             this.mPaddingLeft.toInt(),
             this.mPaddingBottom.toInt()
         )
+
+
         graphCanvasWrapper.drawLine(0.0f, 0.0f, chartXLength.toFloat(), 0.0f, pBaseLine)
 
         var newX: Float
-        val gap = chartXLength / (chartEntities!![0].values.size - 1)
-        for (i in chartEntities!![0].values.indices) {
+        val gap = chartXLength / (chartEntities[0].values.size - 1)
+        for (i in chartEntities[0].values.indices) {
             newX = (gap * i).toFloat()
             graphCanvasWrapper.drawLine(newX, 0.0f, newX, chartYLength.toFloat(), pBaseLine)
 
             drawGraph(graphCanvasWrapper)
             drawXText(graphCanvasWrapper)
         }
+
+        canvas.save()
+        canvas.restore()
+//
+//        if (isMoved) {
+//            Log.d("TAGA_AFF", "is moved")
+//
+//            val index = (locationX / width).toInt()
+//            graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+//            val a = valueMap[index]
+//            graphCanvasWrapper.drawCircle(locationX, y, 8f, pCircle)
+//        }
+
     }
 
 
     private fun drawXText(graphCanvas: GraphCanvasWrapper) {
 
-        if (legendArray == null || legendArray.isNullOrEmpty() || chartEntities == null) {
+        if (legendArray.isEmpty()) {
             return
         }
+
         var x: Float
         var y: Float
-        val xGap = (xLength / (chartEntities!![0].values.size - 1)).toFloat()
+        val xGap = (xLength / (chartEntities[0].values.size - 1)).toFloat()
 
-        for (i in chartEntities!![0].values.indices) {
+        for (i in chartEntities[0].values.indices) {
             val rect = Rect()
-            val text = legendArray!![i]
+            val text = legendArray[i]
             pMarkText.measureText(text)
             pMarkText.textSize = 20f
             pMarkText.typeface = typeFace
@@ -195,48 +268,59 @@ class LineChart : View {
     }
 
     private fun drawGraph(graphCanvasWrapper: GraphCanvasWrapper) {
-
-        if (chartEntities == null) {
-            return
-        }
-
         this.pCircleBG.color = bgColor
 
-        for (m in chartEntities!!.indices) {
+        for (m in chartEntities.indices) {
             val linePath = GraphPath(width, height, mPaddingLeft.toInt(), mPaddingBottom.toInt())
             var first = false
 
             var x: Float
             var y: Float
 
-            this.p.color = chartEntities!![m].color
-            this.pCircle.color = chartEntities!![m].color
+            this.p.color = chartEntities[m].color
+            this.pCircle.color = chartEntities[m].color
 
-            val xGap = xLength / (chartEntities!![m].values.size - 1)
+            val xGap = xLength / (chartEntities[m].values.size - 1)
 
-            for (j in chartEntities!![m].values.indices) {
+            for (j in chartEntities[m].values.indices) {
 
-                if (j < chartEntities!![m].values.size) {
+                if (j < chartEntities[m].values.size) {
                     x = (xGap * j).toFloat()
-                    y = yLength * chartEntities!![m].values[j] / maxValue
-                    if (!first) {
+                    y = yLength * chartEntities[m].values[j] / maxValue
+
+//                    Log.d("TAGAG","x : $x | y : $y")
+
+                    if (first) {
+                        linePath.lineTo(x, y)
+                    } else {
                         linePath.moveTo(x, y)
                         first = true
-                    } else {
-                        linePath.lineTo(x, y)
                     }
+
+//                    if (isMoved) {
+//                        graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+//                        graphCanvasWrapper.drawCircle(locationX, locationY, 8f, pCircle)
+//                    }
+
                 }
             }
 
             graphCanvasWrapper.canvas?.drawPath(linePath, p)
 
-            for (t in chartEntities!![m].values.indices) {
-                if (t < chartEntities!![m].values.size) {
+
+            for (t in chartEntities[m].values.indices) {
+                if (t < chartEntities[m].values.size) {
                     x = (xGap * t).toFloat()
-                    y = yLength * chartEntities!![m].values[t] / maxValue
-                    graphCanvasWrapper.drawCircle(x, y, 8.0f, pCircle)
-                    graphCanvasWrapper.drawCircle(x, y, 4.0f, pCircleBG)
+                    y = yLength * chartEntities[m].values[t] / maxValue
+
+                    with(graphCanvasWrapper) {
+                        drawCircle(x, y, 8.0f, pCircle)
+                        drawCircle(x, y, 4.0f, pCircleBG)
+                    }
+
+//                    valueMap[t] = x
                 }
+
             }
         }
 
@@ -244,60 +328,70 @@ class LineChart : View {
     }
 
     private fun initializePaint() {
-        p = Paint()
-        p.flags = Paint.ANTI_ALIAS_FLAG
-        p.isAntiAlias = true
-        p.color = Color.BLUE
-        p.isFilterBitmap = true
-        p.strokeWidth = this.chartLineSize
-        p.strokeCap = Paint.Cap.ROUND
-        p.style = Paint.Style.STROKE
+        p = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true
+            isFilterBitmap = true
+            color = Color.BLUE
+            strokeWidth = 10f
+            isAntiAlias = true
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
 
-        pCircle = Paint()
-        pCircle.flags = Paint.ANTI_ALIAS_FLAG
-        pCircle.isAntiAlias = true
-        pCircle.isFilterBitmap = true
-        pCircle.color = Color.BLUE
-        pCircle.strokeWidth = (this.chartLineSize * 2)
-        pCircle.style = Paint.Style.STROKE
+        pCircle = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true
+            isFilterBitmap = true
+            color = Color.BLUE
+            strokeWidth = 20f
+            style = Paint.Style.STROKE
+        }
 
-        pCircleBG = Paint()
-        pCircleBG.isAntiAlias = true
-        pCircleBG.color = bgColor
-        pCircleBG.isFilterBitmap = true
-        pCircleBG.strokeWidth = this.chartLineSize
-        pCircleBG.style = Paint.Style.FILL_AND_STROKE
+        pCircleBG = Paint().apply {
+            isAntiAlias = true
+            isFilterBitmap = true
+            color = bgColor
+            strokeWidth = 10f
+            style = Paint.Style.FILL_AND_STROKE
+        }
 
-        pLine = Paint()
-        pLine.flags = Paint.ANTI_ALIAS_FLAG
-        pLine.isAntiAlias = true //text anti alias
-        pLine.shader = LinearGradient(
-            0f,
-            300f,
-            0f,
-            0f,
-            Color.TRANSPARENT,
-            Color.TRANSPARENT,
-            Shader.TileMode.MIRROR
-        )
+        pLine = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true //text anti alias
+            isFilterBitmap = true // bitmap anti alias
+            shader = LinearGradient(
+                0f,
+                300f,
+                0f,
+                0f,
+                Color.TRANSPARENT,
+                Color.TRANSPARENT,
+                Shader.TileMode.MIRROR
+            )
+        }
 
-        pBaseLine = Paint()
-        pBaseLine.flags = Paint.ANTI_ALIAS_FLAG
-        pBaseLine.isAntiAlias = true
-        pBaseLine.isFilterBitmap = true
-        pBaseLine.color = lineColor
-        pBaseLine.strokeWidth = 2f
+        pBaseLine = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true
+            isFilterBitmap = true
+            color = lineColor
+            strokeWidth = 2f
+        }
 
-        pBaseLineX = Paint()
-        pBaseLineX.flags = Paint.ANTI_ALIAS_FLAG
-        pBaseLineX.isAntiAlias = true
-        pBaseLineX.isFilterBitmap = true
-        pBaseLineX.color = lineColor
-        pBaseLineX.strokeWidth = 2f
-        pBaseLineX.style = Paint.Style.STROKE
-        pMarkText = Paint()
-        pMarkText.flags = Paint.ANTI_ALIAS_FLAG
-        pMarkText.isAntiAlias = true
-        pMarkText.color = Color.WHITE
+        pBaseLineX = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true
+            isFilterBitmap = true
+            color = lineColor
+            strokeWidth = 2f
+            style = Paint.Style.STROKE
+        }
+
+        pMarkText = Paint().apply {
+            flags = Paint.ANTI_ALIAS_FLAG
+            isAntiAlias = true
+            color = Color.WHITE
+        }
     }
 }

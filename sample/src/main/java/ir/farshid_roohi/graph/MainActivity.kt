@@ -5,7 +5,6 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ir.farshid_roohi.linegraph.ChartEntity
 import ir.farshid_roohi.linegraph.LineChart
-import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
 
@@ -20,6 +19,8 @@ class MainActivity : AppCompatActivity() {
             add(firstChartEntity)
             add(secondChartEntity)
         }
+
+        val lineChart = findViewById<LineChart>(R.id.lineChart)
         lineChart.setLegend(legendArr)
         lineChart.setList(list)
     }

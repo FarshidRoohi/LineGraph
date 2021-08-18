@@ -4,11 +4,14 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
+import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
 import ir.farshid_roohi.utilites.GraphCanvasWrapper
 import ir.farshid_roohi.utilites.GraphPath
 import java.util.*
+import kotlin.math.abs
 
 
 /**
@@ -147,40 +150,34 @@ class LineChart : View {
     private var lastY = 0f
 
 
-//    @SuppressLint("ClickableViewAccessibility")
-//    override fun onTouchEvent(event: MotionEvent?): Boolean = event?.let {
-//        when (event.action) {
-//            MotionEvent.ACTION_MOVE -> {
-//                isMoved = true
-//                locationX = event.x
-//                locationY = event.y
-//
-//                distanceX += abs(lastX - event.x)
-//                distanceY += abs(lastY - event.y)
-//                lastY = event.y
-//                lastX = event.x
-//                invalidate()
-//            }
-//            MotionEvent.ACTION_UP -> {
-//                isMoved = false
-//                invalidate()
-//            }
-//        }
-//
-//        true
-//    } ?: false
+    @SuppressLint("ClickableViewAccessibility")
+    override fun onTouchEvent(event: MotionEvent?): Boolean = event?.let {
+        when (event.action) {
+            MotionEvent.ACTION_MOVE -> {
+                isMoved = true
+                locationX = event.x
+                locationY = event.y
+                distanceX += abs(lastX - event.x)
+                distanceY += abs(lastY - event.y)
+                lastY = event.y
+                lastX = event.x
+                Log.d("TAG_TT", "distanceX ${locationX} | distanceY : ${locationY}")
+                invalidate()
+            }
+            MotionEvent.ACTION_UP -> {
+                isMoved = false
+                invalidate()
+            }
+        }
 
-//    private var valueMap: HashMap<Int, Float> = HashMap()
+        true
+    } ?: false
+
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas?) {
         super.onDraw(canvas)
         if (canvas == null) {
             return
-        }
-
-        if (chartEntities == null) {
-            canvas.drawColor(bgColor)
-
         }
 
         this.initializePaint()
@@ -217,15 +214,14 @@ class LineChart : View {
 
         canvas.save()
         canvas.restore()
-//
-//        if (isMoved) {
-//            Log.d("TAGA_AFF", "is moved")
-//
-//            val index = (locationX / width).toInt()
-//            graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
-//            val a = valueMap[index]
-//            graphCanvasWrapper.drawCircle(locationX, y, 8f, pCircle)
-//        }
+
+        if (isMoved) {
+            Log.d("TAGA_AFF", "is moved distanceX : $distanceX | distanceY : $distanceY | gap : $gap")
+
+            val index = (locationX / width).toInt()
+            graphCanvasWrapper.drawLine(locationX, yLength.toFloat(), locationX, 0f, pBaseLine)
+            graphCanvasWrapper.drawCircle(locationX, locationY, 8f, pCircle)
+        }
 
     }
 

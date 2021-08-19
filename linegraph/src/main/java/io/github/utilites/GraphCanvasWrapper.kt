@@ -1,4 +1,4 @@
-package ir.farshid_roohi.utilites
+package io.github.utilites
 
 import android.graphics.Bitmap
 import android.graphics.Canvas

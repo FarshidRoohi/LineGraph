@@ -1,4 +1,4 @@
-package ir.farshid_roohi.linegraph
+package io.github.farshidroohi
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -8,8 +8,8 @@ import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.ContextCompat
-import ir.farshid_roohi.utilites.GraphCanvasWrapper
-import ir.farshid_roohi.utilites.GraphPath
+import io.github.utilites.GraphCanvasWrapper
+import io.github.utilites.GraphPath
 import java.util.*
 import kotlin.math.abs
 

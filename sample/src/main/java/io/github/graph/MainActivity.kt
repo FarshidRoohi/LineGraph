@@ -1,10 +1,10 @@
-package ir.farshid_roohi.graph
+package io.github.graph
 
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import ir.farshid_roohi.linegraph.ChartEntity
-import ir.farshid_roohi.linegraph.LineChart
+import io.github.farshidroohi.ChartEntity
+import io.github.farshidroohi.LineChart
 
 class MainActivity : AppCompatActivity() {
 

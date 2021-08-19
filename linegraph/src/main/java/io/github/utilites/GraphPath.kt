@@ -1,4 +1,4 @@
-package ir.farshid_roohi.utilites
+package io.github.utilites
 
 import android.graphics.Path
 import android.graphics.PointF

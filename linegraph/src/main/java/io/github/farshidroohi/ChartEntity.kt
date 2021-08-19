@@ -1,4 +1,4 @@
-package ir.farshid_roohi.linegraph
+package io.github.farshidroohi
 
 /**
  * Created by Farshid Roohi.

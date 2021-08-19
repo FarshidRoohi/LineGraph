@@ -1,4 +1,4 @@
-package ir.farshid_roohi.graph
+package io.github.graph
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

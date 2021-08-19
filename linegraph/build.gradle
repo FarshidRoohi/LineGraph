@@ -32,6 +32,9 @@ publishing {
             def snapshotsRepoUrl = "$buildDir/repos/snapshots"
             url = version.endsWith('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
         }
+        mavenPublish {
+            sonatypeHost = "S01"
+        }
     }
 
 
